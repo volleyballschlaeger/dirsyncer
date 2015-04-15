@@ -74,7 +74,7 @@ public class FileSync {
 		if( file.exists() )
 		{
 			if( md5 != null )
-				if( md5.equals( FileSync.md5sum( file ) ) )
+				if( md5.equals( md5sum( file ) ) )
 				{
 					System.out.println( file.getAbsolutePath() + " is up to date." );
 					return;
@@ -88,18 +88,18 @@ public class FileSync {
 
 		try {
 			URLConnection connection = url.openConnection();
-			connection.setReadTimeout( 30000 );
-			connection.setConnectTimeout( 30000 );
+			connection.setReadTimeout( 20000 );
+			connection.setConnectTimeout( 20000 );
 			inputstream = connection.getInputStream();
 			outputstream = new FileOutputStream( tmp );
 			Stream2StreamCopy( outputstream, inputstream );
 			outputstream.close();
 
 			if( md5 != null )
-				if( !md5.equals( FileSync.md5sum( tmp ) ) )
-					throw new IOException();
+				if( !md5.equals( md5sum( tmp ) ) )
+					throw new IOException( "Download is corrupt." );
 			if( !tmp.renameTo( file ) )
-				throw new IOException();
+				throw new IOException( "Cannot rename file." );
 			System.out.println( "... success!" );
 		}
 		finally {
