@@ -83,7 +83,7 @@ public class SimplePathSync extends FileSync {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return res;
+		return res.replace( "+", "%20" );
 	}
 
 	public List<String> ListPaths( final String baseUrl, final boolean urlEncode ) throws IOException
