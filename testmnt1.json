@@ -1,0 +1,12 @@
+[
+  {
+    "name": "eicar",
+    "type": "mount",
+    "url": "https://raw.githubusercontent.com/volleyballschlaeger/dirsyncer/master/testmnt2.json"
+  },
+  {
+    "name": "fstab",
+    "type": "file",
+    "url": "file:///etc/fstab"
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "eicar.asm",
+    "type": "file",
+    "url": "https://raw.githubusercontent.com/volleyballschlaeger/eicar/master/eicar.asm",
+    "md5": "7e81d137ab58b63ddbc21f4fd95ff2ab"
+  },
+  {
+    "name": "Makefile",
+    "type": "file",
+    "url": "https://raw.githubusercontent.com/volleyballschlaeger/eicar/master/Makefile",
+    "md5": "16e533b03adc60bc4bb2106f9d240a52"
+  }
+]

@@ -1,5 +1,10 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,9 +42,52 @@ public class JSONDirSync extends FileSync {
 				newdir.mkdir();
 				complete &= RecvDirContent( newdir, newentries );
 			}
+			else if( type.equals( "mount" ) ) {
+				String url = entry.getString( "url" );
+				File newdir = new File( dir, name );
+				System.out.println( "mkdir " + newdir );
+				newdir.mkdir();
+				complete &= RecvDirContent( newdir, url );
+			}
 			else
 				System.out.println( type + " invalid type" );
 		}
 		return complete;
+	}
+
+	public static String RecvString( String urlString ) throws IOException {
+		URL url = new URL( urlString );
+		InputStream inputstream = null;
+		BufferedReader reader = null;
+		try {
+			URLConnection connection = url.openConnection();
+			connection.setReadTimeout( 20000 );
+			connection.setConnectTimeout( 20000 );
+			inputstream = connection.getInputStream();
+			reader = new BufferedReader( new InputStreamReader( inputstream, "UTF-8" ) );
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while( ( line = reader.readLine() ) != null ) {
+				sb.append( line );
+				sb.append( '\n' );
+			}
+			return sb.toString();
+		}
+		finally {
+			if( reader != null )
+				reader.close();
+			if( inputstream != null )
+				inputstream.close();
+		}
+	}
+
+	public static boolean RecvDirContent( File dir, String urlString ) {
+		try {
+			JSONArray newentries = new JSONArray( RecvString( urlString ) );
+			return RecvDirContent( dir, newentries );
+		} catch( Exception e ) {
+			System.out.println( dir + " failed: " + e );
+			return false;
+		}
 	}
 }
