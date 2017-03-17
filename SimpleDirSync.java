@@ -14,14 +14,12 @@ import java.util.regex.Pattern;
 
 public class SimpleDirSync extends FileSync {
 	private static final Pattern MD5SUMPATTERN = Pattern.compile( "([0-9a-f]{32}) [ \\*](.+)" );
-	private static final Pattern BASEURLPATTERN = Pattern.compile(  "(.+://.+)/(.+)" );
+	private static final Pattern BASEURLPATTERN = Pattern.compile( "(.+://.+)/.+" );
 
 	private final File baseDir;
-	private final String baseUrl;
 
-	public SimpleDirSync( File bd, String bu ) {
+	public SimpleDirSync( File bd ) {
 		baseDir = bd;
-		baseUrl = bu;
 	}
 
 	public static void RecvPath( File baseDir, String relPath, String urlString, String md5 ) throws IOException {
@@ -57,7 +55,7 @@ public class SimpleDirSync extends FileSync {
 		return result.toString();
 	}
 
-	public class Entry {
+	public static abstract class Entry {
 		public final String md5;
 		public final String path;
 
@@ -71,9 +69,7 @@ public class SimpleDirSync extends FileSync {
 				throw new Exception( "Syntax error" );
 		}
 
-		public void doit() throws IOException {
-			RecvPath( baseDir, path, baseUrl + encodepath( path ), md5 );
-		}
+		public abstract void doit() throws IOException;
 
 		@Override
 		public String toString() {
@@ -81,8 +77,12 @@ public class SimpleDirSync extends FileSync {
 		}
 	}
 
-	public List<Entry> RecvEntries( String filename ) throws Exception {
-		URL url = new URL( baseUrl + encodepath( filename ) );
+	public List<Entry> RecvEntries( String u ) throws Exception {
+		Matcher m = BASEURLPATTERN.matcher( u );
+		if( !m.matches() )
+			throw new Exception( "Syntax error" );
+		final String baseUrl = m.group( 1 );
+		URL url = new URL( u );
 		InputStream inputstream = null;
 		BufferedReader reader = null;
 		try {
@@ -94,7 +94,12 @@ public class SimpleDirSync extends FileSync {
 			List<Entry> result = new LinkedList<Entry>();
 			String line;
 			while( ( line = reader.readLine() ) != null )
-				result.add( new Entry( line ) );
+				result.add( new Entry( line ) {
+					@Override
+					public void doit() throws IOException {
+						RecvPath( baseDir, path, baseUrl + encodepath( path ), md5 );
+					}
+				} );
 			return result;
 		}
 		finally {
@@ -103,15 +108,5 @@ public class SimpleDirSync extends FileSync {
 			if( inputstream != null )
 				inputstream.close();
 		}
-	}
-
-	public static List<Entry> RecvEntries( File bd, String url ) throws Exception {
-		Matcher m = BASEURLPATTERN.matcher( url );
-		if( m.matches() ) {
-			SimpleDirSync s = new SimpleDirSync( bd, m.group( 1 ) );
-			return s.RecvEntries( m.group( 2 ) );
-		}
-		else
-			throw new Exception( "Syntax error" );
 	}
 }

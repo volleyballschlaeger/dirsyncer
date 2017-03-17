@@ -8,7 +8,8 @@ if len( sys.argv ) < 2:
 	print "Usage: " + sys.argv[0] + " URL"
 	quit()
 
-list = SimpleDirSync.RecvEntries( File( "." ), sys.argv[1] )
+s = SimpleDirSync( File( "." ) )
+list = s.RecvEntries( sys.argv[1] )
 
 for i in list:
 	print i
